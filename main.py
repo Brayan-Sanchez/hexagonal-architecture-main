@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from tscheduler.adapters.local_executor import LocalExecutor
@@ -6,6 +8,7 @@ from tscheduler.adapters.local_storage import LocalStorage
 from tscheduler.domain.core import TaskController
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 class Task(BaseModel):
@@ -19,6 +22,10 @@ You may use http adapter here for me it will just overcomplicate the app
 This is just to get the task from the memory
 """
 controller = TaskController(storage=LocalStorage(), executor=LocalExecutor())
+
+@app.get("/")
+def root():
+    return FileResponse("static/index.html")
 
 @app.post("/tasks")
 def create_task(task: Task):
